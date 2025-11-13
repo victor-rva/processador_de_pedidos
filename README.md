@@ -124,8 +124,8 @@ import (
     "net/http"
 
     "[github.com/labstack/echo/v4](https://github.com/labstack/echo/v4)"
-    "[github.com/victor-rva/projeto01_GO/internal/usecase](https://github.com/victor-rva/processador_de_pedidos/internal/usecase)" // Importar o DTO
-    "[github.com/victor-rva/projeto01_GO/pkg/rabbitmq](https://github.com/victor-rva/processador_de_pedidos/pkg/rabbitmq)"     // Importar o pacote RabbitMQ
+    "[github.com/victor-rva/processador_de_pedidos/internal/usecase](https://github.com/victor-rva/processador_de_pedidos/internal/usecase)" // Importar o DTO
+    "[github.com/victor-rva/processador_de_pedidos/pkg/rabbitmq](https://github.com/victor-rva/processador_de_pedidos/pkg/rabbitmq)"     // Importar o pacote RabbitMQ
     // amqp "[github.com/rabbitmq/amqp091-go](https://github.com/rabbitmq/amqp091-go)" // Pode ser necessário
 )
 
