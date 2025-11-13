@@ -1,4 +1,7 @@
-# Processador de Pedidos
+Aqui está o `README.md` completo:
+
+````markdown
+# PROJETO01_GO - Processador de Pedidos
 
 Um serviço de backend construído em Go para gerenciamento e processamento de pedidos, utilizando uma arquitetura limpa (Clean Architecture) e processamento assíncRono com RabbitMQ.
 
@@ -51,3 +54,133 @@ O `docker-compose.yaml` irá iniciar o RabbitMQ e expor a porta de gerenciamento
 
 ```bash
 docker-compose up -d
+````
+
+  * **RabbitMQ Management:** `http://localhost:15672`
+  * **Usuário:** `guest`
+  * **Senha:** `guest`
+
+### 2\. Inicie o Consumidor (Worker)
+
+Em um terminal, inicie o `Order Service`. Ele ficará "escutando" por mensagens no RabbitMQ.
+
+```bash
+go run ./cmd/order/main.go
+```
+
+Você deverá ver a mensagem: `Starting rabbitmq`
+
+### 3\. Publique um Pedido Manualmente (Teste)
+
+Como a API ainda não está publicando mensagens, vamos fazer isso manualmente através da interface de gerenciamento do RabbitMQ.
+
+1.  Acesse `http://localhost:15672`.
+2.  Vá para a aba **Queues**.
+3.  Clique na fila `orders` (ela deve ter sido criada pelo `cmd/order`).
+4.  Abra a seção **Publish message**.
+5.  Cole o seguinte JSON no campo **Payload**. Este é o DTO `OrderInput` esperado pelo seu *use case*:
+
+<!-- end list -->
+
+```json
+{
+    "id": "order-123",
+    "price": 150.50,
+    "tax": 15.0
+}
+```
+
+6.  Clique em **Publish**.
+
+### 4\. Verifique o Resultado
+
+No terminal onde o `cmd/order/main.go` está rodando, você deverá ver a mensagem de confirmação do processamento:
+
+```
+Mensagem processada e salva no banco {order-123 150.5 15 165.5}
+```
+
+Isso confirma que seu *worker*, *use case* e *repositório* estão funcionando perfeitamente.
+
+-----
+
+## Próximos Passos (TO-DO)
+
+Para finalizar o projeto, a única peça que falta é modificar o `cmd/api/main.go` para atuar como um produtor.
+
+### 1\. Modificar o `OrderHandler`
+
+O *handler* da API precisa:
+
+1.  Ser um `POST /order` (em vez de `GET`).
+2.  Ler o JSON do *body* da requisição.
+3.  Publicar esse JSON no RabbitMQ.
+4.  Retornar `HTTP 202 Accepted` (indicando que o pedido foi aceito para processamento).
+
+**Exemplo de como o `OrderHandler` deveria se parecer:**
+
+```go
+// Em cmd/api/main.go
+
+import (
+    "encoding/json"
+    "net/http"
+
+    "[github.com/labstack/echo/v4](https://github.com/labstack/echo/v4)"
+    "[github.com/victor-rva/projeto01_GO/internal/usecase](https://github.com/victor-rva/processador_de_pedidos/internal/usecase)" // Importar o DTO
+    "[github.com/victor-rva/projeto01_GO/pkg/rabbitmq](https://github.com/victor-rva/processador_de_pedidos/pkg/rabbitmq)"     // Importar o pacote RabbitMQ
+    // amqp "[github.com/rabbitmq/amqp091-go](https://github.com/rabbitmq/amqp091-go)" // Pode ser necessário
+)
+
+// ... (conectar ao RabbitMQ no main) ...
+// ch, err := rabbitmq.OpenChannel()
+// if err != nil {
+//     panic(err)
+// }
+// defer ch.Close()
+// ...
+
+// No main, injetar 'ch' no handler ou torná-lo acessível
+
+func OrderHandler(c echo.Context) error {
+    var input usecase.OrderInput
+
+    // 1. Fazer o "bind" do JSON do body para o DTO
+    if err := c.Bind(&input); err != nil {
+        return c.JSON(http.StatusBadRequest, "Invalid JSON payload")
+    }
+
+    // 2. Serializar o DTO para JSON
+    body, err := json.Marshal(input)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, "Error marshalling JSON")
+    }
+
+    // 3. Publicar no RabbitMQ
+    // (Este passo assume que 'ch' está acessível)
+    // Você precisará adaptar seu pkg/rabbitmq para ter uma função Publish
+    /*
+    err = rabbitmq.Publish(ch, body) // Exemplo de função a ser criada
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, "Error publishing to RabbitMQ")
+    }
+    */
+
+    // 4. Retornar 202 Accepted
+    return c.JSON(http.StatusAccepted, map[string]string{"status": "order received for processing"})
+}
+```
+
+### 2\. Usar Variáveis de Ambiente
+
+Não "hardcode" (fixar) conexões, nomes de fila ou portas. Use variáveis de ambiente para:
+
+  * `RABBITMQ_URL`
+  * `RABBITMQ_QUEUE`
+  * `DB_SOURCE`
+  * `API_PORT`
+
+<!-- end list -->
+
+```
+```
