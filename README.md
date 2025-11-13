@@ -1,5 +1,3 @@
-Aqui está o `README.md` completo:
-
 ````markdown
 # Processador de Pedidos
 
