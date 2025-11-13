@@ -1,7 +1,7 @@
 Aqui está o `README.md` completo:
 
 ````markdown
-# PROJETO01_GO - Processador de Pedidos
+# Processador de Pedidos
 
 Um serviço de backend construído em Go para gerenciamento e processamento de pedidos, utilizando uma arquitetura limpa (Clean Architecture) e processamento assíncRono com RabbitMQ.
 
