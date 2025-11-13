@@ -179,4 +179,3 @@ Não "hardcode" (fixar) conexões, nomes de fila ou portas. Use variáveis de am
 
 <!-- end list -->
 
-```
